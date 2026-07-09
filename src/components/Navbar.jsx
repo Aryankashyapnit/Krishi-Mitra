@@ -1,13 +1,36 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-const Navbar = () => {
+const Navbar = ({
+  lang = 'en',
+  setLang = () => {},
+  token = null,
+  user = null,
+  handleLogout = () => {},
+  setAuthTab = () => {},
+  setShowAuthModal = () => {},
+  isMobileMenuOpen = false,
+  setIsMobileMenuOpen = () => {},
+  t = null
+}) => {
+  // If localizations ('t') is not passed, use a default english fallback dictionary
+  const defaultT = t || {
+    navCrops: "Crops Guide",
+    navMandi: "Marketplace",
+    checkWeather: "Weather Advisor",
+    navSimulator: "Disease Scanner",
+    navSchemes: "Subsidies",
+    navDashboard: "Dashboard",
+    navAdmin: "Admin Panel",
+    login: "Login",
+    logout: "Logout"
+  };
+
   return (
-    <header style={{ background: 'rgba(255, 255, 255, 0.85)', backdropFilter: 'blur(16px)', position: 'sticky', top: 0, zIndex: 100, borderBottom: '1px solid rgba(27, 94, 32, 0.05)' }}>
-      <div className="nav-container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', maxWidth: '1200px', margin: '0 auto', padding: '1rem 5%', boxSizing: 'border-box' }}>
-        
-        <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', textDecoration: 'none', color: 'inherit' }}>
-          {/* Vector Logo representing Plant + Sun */}
+    <nav className="navbar" style={{ position: 'sticky', top: 0, zIndex: 100 }}>
+      <div className="nav-container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', boxSizing: 'border-box' }}>
+        <Link to="/" className="brand-container" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', textDecoration: 'none' }}>
+          {/* Plant + Sun SVG Logo */}
           <svg width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
             <defs>
               <linearGradient id="nav-green" x1="15" y1="85" x2="40" y2="15" gradientUnits="userSpaceOnUse">
@@ -32,27 +55,75 @@ const Navbar = () => {
             <path d="M51 82 C61 74 72 70 81 68" stroke="#FFFFFF" strokeWidth="1.5" strokeLinecap="round" opacity="0.4" />
             <path d="M50 82 C44 82 40 76 42 70 C44 64 50 60 56 60" stroke="#0B4B28" strokeWidth="3.5" strokeLinecap="round" fill="none" />
           </svg>
-          <div style={{ display: 'flex', flexDirection: 'column', textAlign: 'left', lineHeight: 1 }}>
-            <h1 style={{ display: 'flex', gap: '4px', fontSize: '1.4rem', margin: 0, lineHeight: 1 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', textAlign: 'left', lineHeight: '1' }}>
+            <span className="brand-name" style={{ display: 'flex', gap: '4px', fontSize: '1.4rem', margin: '0' }}>
               <span style={{ color: '#0B4B28' }}>Krishi</span>
               <span style={{ color: '#4CAF50' }}>Mitra</span>
-            </h1>
-            <span style={{ fontSize: '0.5rem', fontWeight: 700, letterSpacing: '0.5px', color: '#666666', marginTop: '2px' }}>
+            </span>
+            <span style={{ fontSize: '0.5rem', fontWeight: '700', letterSpacing: '0.5px', color: '#666666', marginTop: '2px' }}>
               AGRICULTURE'S TRUE FRIEND
             </span>
           </div>
         </Link>
 
-        <nav style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
-          <Link to="/" className="nav-link" style={{ textDecoration: 'none', fontWeight: 600, color: 'var(--text-dark)' }}>Home</Link>
-          <Link to="/crops" className="nav-link" style={{ textDecoration: 'none', fontWeight: 600, color: 'var(--primary-light)' }}>Crops Guide</Link>
-          <a href="/#mandi" className="nav-link" style={{ textDecoration: 'none', fontWeight: 600, color: 'var(--text-dark)' }}>Marketplace</a>
-          <a href="/#weather" className="nav-link" style={{ textDecoration: 'none', fontWeight: 600, color: 'var(--text-dark)' }}>Weather Advisor</a>
-          <a href="/#schemes" className="nav-link" style={{ textDecoration: 'none', fontWeight: 600, color: 'var(--text-dark)' }}>Subsidies</a>
-          <a href="/#simulator" className="nav-link" style={{ textDecoration: 'none', fontWeight: 600, color: 'var(--text-dark)' }}>Disease Scanner</a>
-        </nav>
+        {/* Mobile Hamburger Toggle */}
+        <button 
+          className="mobile-menu-toggle"
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          aria-label="Toggle menu"
+        >
+          {isMobileMenuOpen ? '✕' : '☰'}
+        </button>
+
+        <ul className={`nav-links ${isMobileMenuOpen ? 'mobile-active' : ''}`}>
+          <li><Link to="/crops" className="nav-link" onClick={() => setIsMobileMenuOpen(false)}>{defaultT.navCrops}</Link></li>
+          <li><a href="/#mandi" className="nav-link" onClick={() => setIsMobileMenuOpen(false)}>{defaultT.navMandi}</a></li>
+          <li><a href="/#weather" className="nav-link" onClick={() => setIsMobileMenuOpen(false)}>{defaultT.checkWeather}</a></li>
+          <li><a href="/#simulator" className="nav-link" onClick={() => setIsMobileMenuOpen(false)}>{defaultT.navSimulator}</a></li>
+          <li><a href="/#schemes" className="nav-link" onClick={() => setIsMobileMenuOpen(false)}>{defaultT.navSchemes}</a></li>
+          
+          {/* Authenticated Links */}
+          {token && (
+            <li><a href="/#dashboard" className="nav-link" style={{ color: 'var(--primary-dark)', fontWeight: '700' }} onClick={() => setIsMobileMenuOpen(false)}>{defaultT.navDashboard}</a></li>
+          )}
+          {token && user?.role === 'admin' && (
+            <li><a href="/#admin" className="nav-link" style={{ color: '#D35400', fontWeight: '700' }} onClick={() => setIsMobileMenuOpen(false)}>{defaultT.navAdmin}</a></li>
+          )}
+
+          <li>
+            <select 
+              value={lang} 
+              onChange={(e) => { setLang(e.target.value); setIsMobileMenuOpen(false); }}
+              style={{
+                padding: '0.4rem 0.8rem',
+                borderRadius: '8px',
+                border: '1px solid var(--primary-light)',
+                fontWeight: '600',
+                color: 'var(--primary-dark)',
+                background: 'white',
+                cursor: 'pointer',
+                fontFamily: 'var(--sans)'
+              }}
+            >
+              <option value="en">English</option>
+              <option value="hi">हिन्दी</option>
+            </select>
+          </li>
+
+          <li>
+            {token ? (
+              <button onClick={() => { handleLogout(); setIsMobileMenuOpen(false); }} className="nav-btn" style={{ background: '#7F8C8D' }}>
+                🚪 {defaultT.logout}
+              </button>
+            ) : (
+              <button onClick={() => { setAuthTab('login'); setShowAuthModal(true); setIsMobileMenuOpen(false); }} className="nav-btn">
+                👤 {defaultT.login}
+              </button>
+            )}
+          </li>
+        </ul>
       </div>
-    </header>
+    </nav>
   );
 };
 
