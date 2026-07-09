@@ -1,19 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 import '../App.css';
 
-const Crops = ({ 
-  lang, 
-  setLang, 
-  token, 
-  user, 
-  handleLogout, 
-  setAuthTab, 
-  setShowAuthModal, 
-  isMobileMenuOpen, 
-  setIsMobileMenuOpen, 
-  t 
-}) => {
+const Crops = () => {
   const [crops, setCrops] = useState([]);
   const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:3000/api' : '/api';
 
@@ -34,29 +24,18 @@ const Crops = ({
 
   return (
     <div className="page-wrapper" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <Navbar 
-        lang={lang} 
-        setLang={setLang} 
-        token={token} 
-        user={user} 
-        handleLogout={handleLogout} 
-        setAuthTab={setAuthTab} 
-        setShowAuthModal={setShowAuthModal} 
-        isMobileMenuOpen={isMobileMenuOpen} 
-        setIsMobileMenuOpen={setIsMobileMenuOpen} 
-        t={t} 
-      />
+      <Navbar />
       
       <main style={{ padding: '4rem 5%', maxWidth: '1200px', margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
-        <div className="section-header" style={{ marginBottom: '3rem' }}>
-          <h2 className="section-title">{t.cropsTitle || "Crop Advisory Guide"}</h2>
-          <p className="section-subtitle">{t.cropsSub || "Scientific cultivation protocols, seasonal detail trackers, and soil recommendations."}</p>
+        <div className="section-header" style={{ marginBottom: '3rem', textAlign: 'center' }}>
+          <h2 className="section-title">Crop Advisory Guide</h2>
+          <p className="section-subtitle">Scientific cultivation protocols, seasonal detail trackers, and soil recommendations.</p>
         </div>
 
         <div className="features-grid">
           {crops.length === 0 ? (
             <p style={{ gridColumn: '1/-1', textAlign: 'center', color: 'var(--text-muted)' }}>
-              {lang === 'en' ? 'Loading crop databases from backend API...' : 'बैकएंड एपीआई से फसल डेटाबेस लोड हो रहा है...'}
+              Loading crop databases from backend API...
             </p>
           ) : (
             crops.map((crop) => (
@@ -74,9 +53,9 @@ const Crops = ({
                 <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', flexGrow: '1', textAlign: 'left' }}>
                   <h3 className="feature-title" style={{ fontSize: '1.4rem', color: 'var(--primary-dark)', margin: '0 0 1rem' }}>{crop.name}</h3>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: '0.9rem', marginBottom: '1.5rem', flexGrow: '1' }}>
-                    <div><strong>🌱 {lang === 'en' ? 'Soil' : 'मिट्टी'}:</strong> {crop.soil_type}</div>
-                    <div><strong>💧 {lang === 'en' ? 'Water' : 'पानी'}:</strong> {crop.water_needs}</div>
-                    <div><strong>🧪 {lang === 'en' ? 'Nutrients' : 'खाद/पोषण'}:</strong> {crop.fertilizer_tips}</div>
+                    <div><strong>🌱 Soil:</strong> {crop.soil_type}</div>
+                    <div><strong>💧 Water:</strong> {crop.water_needs}</div>
+                    <div><strong>🧪 Nutrients:</strong> {crop.fertilizer_tips}</div>
                   </div>
                 </div>
               </div>
@@ -85,11 +64,7 @@ const Crops = ({
         </div>
       </main>
 
-      <footer className="footer" style={{ marginTop: 'auto' }}>
-        <div className="footer-bottom">
-          <p>{t.copyright || "© 2026 Krishi Mitra. Your Farming Partner."}</p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };

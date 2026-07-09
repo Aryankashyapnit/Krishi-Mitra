@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import Logo from './components/Logo';
 import Navbar from './components/Navbar';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Crops from './pages/Crops';
 import './App.css';
 
 const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:3000/api' : '/api';
@@ -763,7 +765,11 @@ function App() {
   };
 
   return (
-    <>
+    <Router>
+      <Routes>
+        <Route path="/crops" element={<Crops />} />
+        <Route path="/" element={
+          <>
       <Navbar 
         lang={lang} 
         setLang={setLang} 
@@ -1799,7 +1805,10 @@ function App() {
           </button>
         )}
       </div>
-    </>
+          </>
+        } />
+      </Routes>
+    </Router>
   );
 }
 
