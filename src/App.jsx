@@ -295,6 +295,8 @@ function App() {
   const [chatHistory, setChatHistory] = useState([
     { sender: 'assistant', text: 'Hello! I am your Krishi Assistant. Ask me anything about crop diseases, Mandi prices, KCC loans or weather! / नमस्ते! मैं आपका कृषि सहायक हूँ। फसलों की बीमारी, मंडी भाव, KCC लोन या मौसम के बारे में कुछ भी पूछें!' }
   ]);
+  
+  const [activeFaq, setActiveFaq] = useState(null);
 
   const t = localizations[lang];
 
@@ -833,6 +835,22 @@ function App() {
         </ul>
       </nav>
 
+      {/* Alerts Ticker */}
+      <div className="alerts-ticker-container">
+        <div className="alerts-ticker-title">
+          📢 {lang === 'en' ? 'Alerts' : 'कृषि सूचना'}
+        </div>
+        <div className="alerts-ticker-wrapper">
+          <div className="alerts-ticker-content">
+            {lang === 'en' ? (
+              <span>• 🌾 Sowing window for soybean starting next week in Central India • 🌧️ Heavy rains expected in western districts of Maharashtra - take caution • 💰 Apply for Solar Pump subsidy under PM-KUSUM before Aug 15! • 🐛 Leaf Rust alert: inspect wheat crops daily.</span>
+            ) : (
+              <span>• 🌾 मध्य भारत में अगले सप्ताह से सोयाबीन की बुवाई का समय शुरू • 🌧️ महाराष्ट्र के पश्चिमी जिलों में भारी बारिश की चेतावनी - सतर्क रहें • 💰 पीएम-कुसुम योजना के तहत सोलर पंप सब्सिडी के लिए 15 अगस्त से पहले आवेदन करें! • 🐛 पत्ती गेरूआ रोग की चेतावनी: गेंहू की फसलों की दैनिक जांच करें।</span>
+            )}
+          </div>
+        </div>
+      </div>
+
       {/* Hero Section */}
       <header id="home" className="hero-section">
         <div className="hero-text">
@@ -1092,6 +1110,61 @@ function App() {
                   )}
                 </tbody>
               </table>
+            </div>
+
+            {/* Price Trend Chart Card */}
+            <div className="visual-card" style={{ maxWidth: '900px', margin: '2rem auto 0', padding: '2rem', textAlign: 'left', width: '100%', boxSizing: 'border-box' }}>
+              <h3 style={{ color: 'var(--primary-dark)', margin: '0 0 1rem', fontSize: '1.25rem' }}>
+                📈 {lang === 'en' ? 'Wheat Price Trend (Rs./Quintal)' : 'गेंहू मंडी भाव रुझान (₹/क्विंटल)'}
+              </h3>
+              <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '2rem' }}>
+                {lang === 'en' ? 'Average market prices tracked over the last 5 months across major hubs.' : 'पिछले 5 महीनों में प्रमुख केंद्रों पर ट्रैक किए गए औसत बाजार भाव।'}
+              </p>
+              
+              {/* SVG Chart */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', width: '100%' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', height: '200px', paddingBottom: '0.5rem', borderBottom: '2px solid var(--border-color)', position: 'relative' }}>
+                  {/* Grid Lines */}
+                  <div style={{ position: 'absolute', bottom: '25%', left: 0, right: 0, height: '1px', background: 'rgba(0,0,0,0.05)', borderStyle: 'dashed' }}></div>
+                  <div style={{ position: 'absolute', bottom: '50%', left: 0, right: 0, height: '1px', background: 'rgba(0,0,0,0.05)', borderStyle: 'dashed' }}></div>
+                  <div style={{ position: 'absolute', bottom: '75%', left: 0, right: 0, height: '1px', background: 'rgba(0,0,0,0.05)', borderStyle: 'dashed' }}></div>
+                  
+                  {/* Bar 1 */}
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '15%', gap: '0.5rem', zIndex: 1 }}>
+                    <span style={{ fontSize: '0.78rem', fontWeight: '700', color: 'var(--primary-dark)' }}>₹2,050</span>
+                    <div style={{ width: '100%', height: '110px', background: 'var(--primary-light)', opacity: '0.7', borderRadius: '6px 6px 0 0', transition: 'height 0.3s' }}></div>
+                    <span style={{ fontSize: '0.8rem', fontWeight: '600' }}>Mar</span>
+                  </div>
+                  
+                  {/* Bar 2 */}
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '15%', gap: '0.5rem', zIndex: 1 }}>
+                    <span style={{ fontSize: '0.78rem', fontWeight: '700', color: 'var(--primary-dark)' }}>₹2,120</span>
+                    <div style={{ width: '100%', height: '125px', background: 'var(--primary-light)', opacity: '0.8', borderRadius: '6px 6px 0 0' }}></div>
+                    <span style={{ fontSize: '0.8rem', fontWeight: '600' }}>Apr</span>
+                  </div>
+
+                  {/* Bar 3 */}
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '15%', gap: '0.5rem', zIndex: 1 }}>
+                    <span style={{ fontSize: '0.78rem', fontWeight: '700', color: 'var(--primary-dark)' }}>₹2,180</span>
+                    <div style={{ width: '100%', height: '135px', background: 'var(--primary-light)', opacity: '0.9', borderRadius: '6px 6px 0 0' }}></div>
+                    <span style={{ fontSize: '0.8rem', fontWeight: '600' }}>May</span>
+                  </div>
+
+                  {/* Bar 4 */}
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '15%', gap: '0.5rem', zIndex: 1 }}>
+                    <span style={{ fontSize: '0.78rem', fontWeight: '700', color: 'var(--primary-dark)' }}>₹2,210</span>
+                    <div style={{ width: '100%', height: '145px', background: 'var(--primary-gradient)', borderRadius: '6px 6px 0 0' }}></div>
+                    <span style={{ fontSize: '0.8rem', fontWeight: '600' }}>Jun</span>
+                  </div>
+
+                  {/* Bar 5 */}
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '15%', gap: '0.5rem', zIndex: 1 }}>
+                    <span style={{ fontSize: '0.78rem', fontWeight: '700', color: 'var(--primary-dark)' }}>₹2,225</span>
+                    <div style={{ width: '100%', height: '150px', background: 'var(--primary-gradient)', borderRadius: '6px 6px 0 0', boxShadow: '0 0 10px rgba(76, 175, 80, 0.3)' }}></div>
+                    <span style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--primary-dark)' }}>Jul (Now)</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         )}
@@ -1622,6 +1695,89 @@ function App() {
           </div>
         </div>
       )}
+
+      {/* FAQ Accordion Section */}
+      <section id="faq" className="features-section" style={{ background: '#F9FAFB', borderTop: '1px solid var(--border-color)', borderBottom: '1px solid var(--border-color)' }}>
+        <div className="section-header">
+          <h2 className="section-title">{lang === 'en' ? 'Frequently Asked Questions' : 'अक्सर पूछे जाने वाले प्रश्न'}</h2>
+          <p className="section-subtitle">
+            {lang === 'en' ? 'Find answers to common questions about our crop tools and mandi rates.' : 'फसल रोग स्कैनर और मंडी बाजार के बारे में सामान्य प्रश्नों के उत्तर पाएं।'}
+          </p>
+        </div>
+        
+        <div style={{ maxWidth: '800px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          {[
+            {
+              q: lang === 'en' ? "How does the AI Leaf Disease Scanner work?" : "एआई लीफ डिजीज स्कैनर कैसे काम करता है?",
+              a: lang === 'en' 
+                ? "Our Leaf Scanner uses deep learning vision models to diagnose crop leaf infections. You can select a preset crop leaf or upload a photo. The system identifies the disease and returns natural, organic remedies instantly."
+                : "हमaur लीफ स्कैनर फसल की पत्तियों के रोगों की पहचान के लिए डीप लर्निंग विज़न मॉडल का उपयोग करता है। आप एक पत्ती चुन सकते हैं या फोटो अपलोड कर सकते हैं। सिस्टम बीमारी की पहचान करके जैविक उपचार प्रदान करता है।"
+            },
+            {
+              q: lang === 'en' ? "How do I list my crop produce in the Marketplace?" : "मैं मार्केटप्लेस में अपनी फसल की उपज कैसे सूचीबद्ध करूं?",
+              a: lang === 'en'
+                ? "First, sign up or log in. Go to the Marketplace section, click 'Add Listing' to input crop name, price, quantity, and location, and publish. Verified buyers will see your contact card and call you directly."
+                : "सबसे पहले लॉग इन करें। इसके बाद मंडी मार्केटप्लेस टैब में 'Add Listing' पर क्लिक करें, फसल का नाम, मूल्य, मात्रा और स्थान दर्ज करें और सबमिट करें। खरीदार आपका फोन नंबर देख सकेंगे और सीधे आपसे संपर्क कर सकेंगे।"
+            },
+            {
+              q: lang === 'en' ? "Are there any service charges or commission?" : "क्या कोई सेवा शुल्क या कमीशन है?",
+              a: lang === 'en'
+                ? "No, Krishi Mitra is completely free. We do not charge commission, listing fees, or transaction costs. The deal is finalized directly between you and the buyer."
+                : "नहीं, कृषि मित्र बिल्कुल मुफ्त है। हम कोई कमीशन या लिस्टिंग शुल्क नहीं लेते हैं। सौदे सीधे आपके और खरीदार के बीच तय होते हैं।"
+            }
+          ].map((faq, idx) => (
+            <div 
+              key={idx} 
+              style={{ 
+                background: 'white', 
+                borderRadius: '12px', 
+                border: '1px solid var(--border-color)', 
+                overflow: 'hidden', 
+                transition: 'all 0.3s' 
+              }}
+            >
+              <button 
+                onClick={() => setActiveFaq(activeFaq === idx ? null : idx)}
+                style={{ 
+                  width: '100%', 
+                  padding: '1.25rem 1.5rem', 
+                  background: 'none', 
+                  border: 'none', 
+                  textAlign: 'left', 
+                  display: 'flex', 
+                  justifyContent: 'space-between', 
+                  alignItems: 'center', 
+                  cursor: 'pointer', 
+                  fontFamily: 'var(--sans)', 
+                  fontWeight: '700', 
+                  fontSize: '1.05rem', 
+                  color: 'var(--primary-dark)',
+                  outline: 'none'
+                }}
+              >
+                <span>{faq.q}</span>
+                <span style={{ transition: 'transform 0.2s', transform: activeFaq === idx ? 'rotate(180deg)' : 'rotate(0)' }}>
+                  ▼
+                </span>
+              </button>
+              
+              <div 
+                style={{ 
+                  maxHeight: activeFaq === idx ? '200px' : '0', 
+                  overflow: 'hidden', 
+                  transition: 'max-height 0.3s cubic-bezier(0, 1, 0, 1)', 
+                  background: '#F9FAFB', 
+                  borderTop: activeFaq === idx ? '1px solid var(--border-color)' : 'none' 
+                }}
+              >
+                <p style={{ padding: '1.25rem 1.5rem', margin: 0, fontSize: '0.92rem', color: 'var(--text-muted)', lineHeight: '1.5' }}>
+                  {faq.a}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
 
       {/* Footer */}
       <footer className="footer">

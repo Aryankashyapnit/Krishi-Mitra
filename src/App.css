@@ -1003,3 +1003,51 @@
   }
 }
 
+/* Alerts scrolling banner */
+.alerts-ticker-container {
+  background: #FFFBEB;
+  border-bottom: 1px solid #FEF3C7;
+  display: flex;
+  align-items: center;
+  height: 40px;
+  overflow: hidden;
+  font-family: var(--sans);
+  font-size: 0.88rem;
+  color: #B45309;
+  width: 100%;
+}
+
+.alerts-ticker-title {
+  background: #F59E0B;
+  color: white;
+  padding: 0 1.25rem;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  font-weight: 700;
+  z-index: 10;
+  box-shadow: 4px 0 10px rgba(0, 0, 0, 0.05);
+  white-space: nowrap;
+}
+
+.alerts-ticker-wrapper {
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.alerts-ticker-content {
+  display: inline-block;
+  white-space: nowrap;
+  animation: ticker-scroll 25s linear infinite;
+  padding-left: 100%;
+}
+
+@keyframes ticker-scroll {
+  0% { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(-100%, 0, 0); }
+}
+
+
