@@ -280,6 +280,7 @@ function App() {
   const [selectedCrop, setSelectedCrop] = useState(null);
   const [isScanning, setIsScanning] = useState(false);
   const [scanResult, setScanResult] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
 
   // Detail Modal state
   const [selectedCropDetails, setSelectedCropDetails] = useState(null);
@@ -666,6 +667,12 @@ function App() {
   // --- CROP LEAF SCANNERS ---
 
   const handleModelScan = (cropKey) => {
+    const defaultImgUrls = {
+      wheat: "https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=400",
+      tomato: "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=400",
+      rice: "https://images.unsplash.com/photo-1536257130722-ea1c9ad9d447?w=400"
+    };
+    setPreviewUrl(defaultImgUrls[cropKey]);
     setIsScanning(true);
     setScanResult(null);
     setSelectedCrop(cropKey);
@@ -712,6 +719,7 @@ function App() {
     const file = e.target.files[0];
     if (!file) return;
 
+    setPreviewUrl(URL.createObjectURL(file));
     setIsScanning(true);
     setScanResult(null);
     setSelectedCrop('custom');
@@ -1202,30 +1210,38 @@ function App() {
             </div>
           </div>
 
-          <div className="interactive-panel">
+          <div className="interactive-panel" style={{ overflow: 'hidden' }}>
             {isScanning && (
-              <>
+              <div style={{ position: 'relative', width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                 <div className="scanner-line"></div>
-                <div className="placeholder-view">
-                  <div style={{ fontSize: '3rem', marginBottom: '1rem', animation: 'pulse-soft 1s infinite' }}>🔍</div>
-                  <p>{t.simScanning}</p>
-                </div>
-              </>
+                {previewUrl ? (
+                  <div style={{ position: 'relative', width: '180px', height: '180px', borderRadius: '20px', overflow: 'hidden', border: '3px solid var(--primary-light)', boxShadow: '0 0 20px rgba(76, 175, 80, 0.4)', marginBottom: '1rem' }}>
+                    <img src={previewUrl} alt="Scanning Leaf" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.85)' }} />
+                    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(76, 175, 80, 0.15)' }}></div>
+                  </div>
+                ) : (
+                  <div style={{ fontSize: '3.5rem', marginBottom: '1rem', animation: 'pulse-soft 1s infinite' }}>🔍</div>
+                )}
+                <p style={{ fontWeight: '700', color: 'var(--primary-dark)', margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', background: '#27AE60', animation: 'pulse-soft 0.8s infinite' }}></span>
+                  {t.simScanning}
+                </p>
+              </div>
             )}
 
             {!isScanning && !scanResult && (
               <div className="placeholder-view">
-                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📷</div>
-                <p style={{ maxWidth: '250px', margin: '0 auto' }}>{t.simPlaceholder}</p>
+                <div style={{ fontSize: '3.5rem', marginBottom: '1rem' }}>📷</div>
+                <p style={{ maxWidth: '250px', margin: '0 auto', fontWeight: '500' }}>{t.simPlaceholder}</p>
               </div>
             )}
 
             {!isScanning && scanResult && (
               <div className="result-card">
-                {scanResult.imageUrl ? (
-                  <div style={{ height: '140px', width: '140px', margin: '0 auto 1rem', borderRadius: '15px', overflow: 'hidden', border: '2px solid var(--primary-light)' }}>
+                {scanResult.imageUrl || previewUrl ? (
+                  <div style={{ height: '140px', width: '140px', margin: '0 auto 1rem', borderRadius: '15px', overflow: 'hidden', border: '2px solid var(--primary-light)', boxShadow: '0 4px 10px rgba(0,0,0,0.1)' }}>
                     <img 
-                      src={`http://localhost:3000${scanResult.imageUrl}`} 
+                      src={previewUrl || (scanResult.imageUrl.startsWith('http') ? scanResult.imageUrl : `${API_BASE.replace('/api', '')}${scanResult.imageUrl}`)} 
                       alt="Uploaded Leaf" 
                       style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                     />
