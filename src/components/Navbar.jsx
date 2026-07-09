@@ -13,7 +13,6 @@ const Navbar = ({
   setIsMobileMenuOpen = () => {},
   t = null
 }) => {
-  // If localizations ('t') is not passed, use a default english fallback dictionary
   const defaultT = t || {
     navCrops: "Crops Guide",
     navMandi: "Marketplace",
@@ -76,19 +75,12 @@ const Navbar = ({
         </button>
 
         <ul className={`nav-links ${isMobileMenuOpen ? 'mobile-active' : ''}`}>
+          <li><Link to="/" className="nav-link" onClick={() => setIsMobileMenuOpen(false)}>Home</Link></li>
           <li><Link to="/crops" className="nav-link" onClick={() => setIsMobileMenuOpen(false)}>{defaultT.navCrops}</Link></li>
-          <li><a href="/#mandi" className="nav-link" onClick={() => setIsMobileMenuOpen(false)}>{defaultT.navMandi}</a></li>
-          <li><a href="/#weather" className="nav-link" onClick={() => setIsMobileMenuOpen(false)}>{defaultT.checkWeather}</a></li>
-          <li><a href="/#simulator" className="nav-link" onClick={() => setIsMobileMenuOpen(false)}>{defaultT.navSimulator}</a></li>
-          <li><a href="/#schemes" className="nav-link" onClick={() => setIsMobileMenuOpen(false)}>{defaultT.navSchemes}</a></li>
-          
-          {/* Authenticated Links */}
-          {token && (
-            <li><a href="/#dashboard" className="nav-link" style={{ color: 'var(--primary-dark)', fontWeight: '700' }} onClick={() => setIsMobileMenuOpen(false)}>{defaultT.navDashboard}</a></li>
-          )}
-          {token && user?.role === 'admin' && (
-            <li><a href="/#admin" className="nav-link" style={{ color: '#D35400', fontWeight: '700' }} onClick={() => setIsMobileMenuOpen(false)}>{defaultT.navAdmin}</a></li>
-          )}
+          <li><Link to="/marketplace" className="nav-link" onClick={() => setIsMobileMenuOpen(false)}>{defaultT.navMandi}</Link></li>
+          <li><Link to="/weather" className="nav-link" onClick={() => setIsMobileMenuOpen(false)}>{defaultT.checkWeather}</Link></li>
+          <li><Link to="/disease" className="nav-link" onClick={() => setIsMobileMenuOpen(false)}>{defaultT.navSimulator}</Link></li>
+          <li><Link to="/loans" className="nav-link" onClick={() => setIsMobileMenuOpen(false)}>{defaultT.navSchemes}</Link></li>
 
           <li>
             <select 
@@ -116,9 +108,9 @@ const Navbar = ({
                 🚪 {defaultT.logout}
               </button>
             ) : (
-              <button onClick={() => { setAuthTab('login'); setShowAuthModal(true); setIsMobileMenuOpen(false); }} className="nav-btn">
+              <Link to="/login" onClick={() => setIsMobileMenuOpen(false)} className="nav-btn" style={{ textDecoration: 'none', display: 'inline-block' }}>
                 👤 {defaultT.login}
-              </button>
+              </Link>
             )}
           </li>
         </ul>

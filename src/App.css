@@ -851,17 +851,18 @@
   background: var(--primary-gradient);
   color: white;
   border: none;
-  box-shadow: 0 4px 15px rgba(27, 94, 32, 0.3);
+  box-shadow: 0 8px 30px rgba(27, 94, 32, 0.35);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.8rem;
+  animation: pulse-soft 2s infinite;
   transition: transform 0.2s;
 }
 
 .chatbot-toggle:hover {
-  transform: scale(1.08);
+  transform: scale(1.08) rotate(5deg);
 }
 
 .chatbot-window {
@@ -1048,6 +1049,14 @@
 @keyframes ticker-scroll {
   0% { transform: translate3d(0, 0, 0); }
   100% { transform: translate3d(-100%, 0, 0); }
+}
+
+/* Crop handbook zoom transitions */
+.crop-card-img {
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.feature-card:hover .crop-card-img {
+  transform: scale(1.06);
 }
 
 
