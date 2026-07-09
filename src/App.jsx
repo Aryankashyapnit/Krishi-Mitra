@@ -283,6 +283,17 @@ function App() {
 
   // Detail Modal state
   const [selectedCropDetails, setSelectedCropDetails] = useState(null);
+  
+  const [marketTab, setMarketTab] = useState('listings');
+  const [mandiRatesList, setMandiRatesList] = useState([]);
+  const [mandiStateFilter, setMandiStateFilter] = useState('All');
+  const [mandiCropSearch, setMandiCropSearch] = useState('');
+  
+  const [showChatbot, setShowChatbot] = useState(false);
+  const [chatInput, setChatInput] = useState('');
+  const [chatHistory, setChatHistory] = useState([
+    { sender: 'assistant', text: 'Hello! I am your Krishi Assistant. Ask me anything about crop diseases, Mandi prices, KCC loans or weather! / नमस्ते! मैं आपका कृषि सहायक हूँ। फसलों की बीमारी, मंडी भाव, KCC लोन या मौसम के बारे में कुछ भी पूछें!' }
+  ]);
 
   const t = localizations[lang];
 
@@ -375,6 +386,53 @@ function App() {
       }
     } catch (err) {
       console.warn('Failed to fetch weather information.');
+    }
+  };
+
+  const fetchMandiBoard = async (state, crop) => {
+    try {
+      const stateQuery = state && state !== 'All' ? `&state=${state}` : '';
+      const cropQuery = crop ? `&crop=${crop}` : '';
+      const res = await fetch(`${API_BASE}/mandi-board?q=1${stateQuery}${cropQuery}`);
+      if (res.ok) {
+        const data = await res.json();
+        setMandiRatesList(data);
+      }
+    } catch (err) {
+      console.warn('Failed to fetch Mandi rates.');
+    }
+  };
+
+  useEffect(() => {
+    fetchMandiBoard(mandiStateFilter, mandiCropSearch);
+  }, [mandiStateFilter, mandiCropSearch]);
+
+  const handleChatbotSubmit = async (e) => {
+    e.preventDefault();
+    if (!chatInput.trim()) return;
+
+    const userMsg = chatInput;
+    setChatInput('');
+    setChatHistory(prev => [...prev, { sender: 'user', text: userMsg }]);
+
+    try {
+      const res = await fetch(`${API_BASE}/chatbot`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: userMsg })
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setChatHistory(prev => [...prev, { sender: 'assistant', text: data.reply }]);
+      } else {
+        throw new Error('Chat error');
+      }
+    } catch (err) {
+      setChatHistory(prev => [
+        ...prev, 
+        { sender: 'assistant', text: 'Sorry, I am having trouble connecting to the backend. Please check your connection! / क्षमा करें, सर्वर से संपर्क करने में समस्या हो रही है।' }
+      ]);
     }
   };
 
@@ -860,87 +918,175 @@ function App() {
           <p className="section-subtitle">{t.mandiSub}</p>
         </div>
 
-        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '2rem' }}>
-          <button onClick={() => setShowAddForm(!showAddForm)} className="btn-primary" style={{ padding: '0.7rem 1.5rem', borderRadius: '8px' }}>
-            🌾 {t.addListing}
+        {/* Sub Tabs */}
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', marginBottom: '2.5rem' }}>
+          <button 
+            onClick={() => setMarketTab('listings')} 
+            className={marketTab === 'listings' ? 'btn-primary' : 'btn-secondary'}
+            style={{ padding: '0.6rem 1.5rem', borderRadius: '8px', fontSize: '0.95rem' }}
+          >
+            🛒 {lang === 'en' ? 'Farmer Listings' : 'किसान फसल सूचियां'}
+          </button>
+          <button 
+            onClick={() => setMarketTab('mandiRates')} 
+            className={marketTab === 'mandiRates' ? 'btn-primary' : 'btn-secondary'}
+            style={{ padding: '0.6rem 1.5rem', borderRadius: '8px', fontSize: '0.95rem' }}
+          >
+            📈 {lang === 'en' ? 'Official Mandi Rates' : 'सरकारी मंडी भाव'}
           </button>
         </div>
 
-        {showAddForm && (
-          <form onSubmit={handleAddListing} className="visual-card" style={{ maxWidth: '500px', margin: '0 auto 3rem', padding: '2rem' }}>
-            <h3 style={{ margin: '0 0 1.25rem', color: 'var(--primary-dark)', fontSize: '1.25rem' }}>{t.addListing}</h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%', textAlign: 'left' }}>
-              <div>
-                <label style={{ fontSize: '0.9rem', fontWeight: '600' }}>{t.cropName}</label>
-                <input 
-                  type="text" 
-                  value={newCrop} 
-                  onChange={(e) => setNewCrop(e.target.value)} 
-                  required 
-                  className="auth-input"
-                />
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                <div>
-                  <label style={{ fontSize: '0.9rem', fontWeight: '600' }}>{t.quantity}</label>
-                  <input 
-                    type="text" 
-                    value={newQty} 
-                    onChange={(e) => setNewQty(e.target.value)} 
-                    placeholder="e.g. 200 kg" 
-                    required 
-                    className="auth-input"
-                  />
-                </div>
-                <div>
-                  <label style={{ fontSize: '0.9rem', fontWeight: '600' }}>{t.price}</label>
-                  <input 
-                    type="number" 
-                    value={newPrice} 
-                    onChange={(e) => setNewPrice(e.target.value)} 
-                    placeholder="e.g. 25" 
-                    required 
-                    className="auth-input"
-                  />
-                </div>
-              </div>
-              <div>
-                <label style={{ fontSize: '0.9rem', fontWeight: '600' }}>{t.location}</label>
-                <input 
-                  type="text" 
-                  value={newLoc} 
-                  onChange={(e) => setNewLoc(e.target.value)} 
-                  placeholder="e.g. Indore Mandi" 
-                  className="auth-input"
-                />
-              </div>
-              <button type="submit" className="btn-primary" style={{ marginTop: '0.5rem' }}>
-                {t.submitListing}
+        {marketTab === 'listings' ? (
+          <>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '2rem' }}>
+              <button onClick={() => setShowAddForm(!showAddForm)} className="btn-primary" style={{ padding: '0.7rem 1.5rem', borderRadius: '8px' }}>
+                🌾 {t.addListing}
               </button>
             </div>
-          </form>
-        )}
 
-        <div className="features-grid">
-          {listings.map((list) => (
-            <div key={list.id} className="feature-card" style={{ borderLeft: '4px solid var(--primary-light)', padding: '1.5rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--primary-dark)' }}>{list.crop_name}</span>
-                <span style={{ background: '#E8F5E9', color: 'var(--primary-dark)', padding: '0.2rem 0.6rem', borderRadius: '50px', fontSize: '0.75rem', fontWeight: '700' }}>
-                  {list.quantity}
-                </span>
+            {showAddForm && (
+              <form onSubmit={handleAddListing} className="visual-card" style={{ maxWidth: '500px', margin: '0 auto 3rem', padding: '2rem' }}>
+                <h3 style={{ margin: '0 0 1.25rem', color: 'var(--primary-dark)', fontSize: '1.25rem' }}>{t.addListing}</h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%', textAlign: 'left' }}>
+                  <div>
+                    <label style={{ fontSize: '0.9rem', fontWeight: '600' }}>{t.cropName}</label>
+                    <input 
+                      type="text" 
+                      value={newCrop} 
+                      onChange={(e) => setNewCrop(e.target.value)} 
+                      required 
+                      className="auth-input"
+                    />
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                    <div>
+                      <label style={{ fontSize: '0.9rem', fontWeight: '600' }}>{t.quantity}</label>
+                      <input 
+                        type="text" 
+                        value={newQty} 
+                        onChange={(e) => setNewQty(e.target.value)} 
+                        placeholder="e.g. 200 kg" 
+                        required 
+                        className="auth-input"
+                      />
+                    </div>
+                    <div>
+                      <label style={{ fontSize: '0.9rem', fontWeight: '600' }}>{t.price}</label>
+                      <input 
+                        type="number" 
+                        value={newPrice} 
+                        onChange={(e) => setNewPrice(e.target.value)} 
+                        placeholder="e.g. 25" 
+                        required 
+                        className="auth-input"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label style={{ fontSize: '0.9rem', fontWeight: '600' }}>{t.location}</label>
+                    <input 
+                      type="text" 
+                      value={newLoc} 
+                      onChange={(e) => setNewLoc(e.target.value)} 
+                      placeholder="e.g. Indore Mandi" 
+                      className="auth-input"
+                    />
+                  </div>
+                  <button type="submit" className="btn-primary" style={{ marginTop: '0.5rem' }}>
+                    {t.submitListing}
+                  </button>
+                </div>
+              </form>
+            )}
+
+            <div className="features-grid">
+              {listings.map((list) => (
+                <div key={list.id} className="feature-card" style={{ borderLeft: '4px solid var(--primary-light)', padding: '1.5rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--primary-dark)' }}>{list.crop_name}</span>
+                    <span style={{ background: '#E8F5E9', color: 'var(--primary-dark)', padding: '0.2rem 0.6rem', borderRadius: '50px', fontSize: '0.75rem', fontWeight: '700' }}>
+                      {list.quantity}
+                    </span>
+                  </div>
+                  <div style={{ margin: '1rem 0', fontSize: '1.3rem', fontWeight: '700', color: 'var(--primary-dark)' }}>
+                    Rs. {list.price} <span style={{ fontSize: '0.85rem', fontWeight: '400', color: 'var(--text-muted)' }}>/ kg</span>
+                  </div>
+                  <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                    <div>📍 {list.location}</div>
+                    <div>👤 {t.seller}: {list.seller_name}</div>
+                    <div>📞 {t.buyerPhone}: {list.seller_phone}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        ) : (
+          <div className="visual-card" style={{ maxWidth: '900px', margin: '0 auto', padding: '2rem', textAlign: 'left' }}>
+            {/* Search Filters */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
+              <div>
+                <label className="auth-label">{lang === 'en' ? 'Search Crop' : 'फसल खोजें'}</label>
+                <input 
+                  type="text" 
+                  value={mandiCropSearch} 
+                  onChange={(e) => setMandiCropSearch(e.target.value)} 
+                  placeholder={lang === 'en' ? "Search e.g. Wheat..." : "खोजें जैसे: गेंहू..."}
+                  className="auth-input"
+                />
               </div>
-              <div style={{ margin: '1rem 0', fontSize: '1.3rem', fontWeight: '700', color: 'var(--primary-dark)' }}>
-                Rs. {list.price} <span style={{ fontSize: '0.85rem', fontWeight: '400', color: 'var(--text-muted)' }}>/ kg</span>
-              </div>
-              <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-                <div>📍 {list.location}</div>
-                <div>👤 {t.seller}: {list.seller_name}</div>
-                <div>📞 {t.buyerPhone}: {list.seller_phone}</div>
+              <div>
+                <label className="auth-label">{lang === 'en' ? 'Filter by State' : 'राज्य चुनें'}</label>
+                <select 
+                  value={mandiStateFilter} 
+                  onChange={(e) => setMandiStateFilter(e.target.value)} 
+                  className="auth-input"
+                >
+                  <option value="All">{lang === 'en' ? 'All States' : 'सभी राज्य'}</option>
+                  <option value="MP">Madhya Pradesh (MP)</option>
+                  <option value="MH">Maharashtra (MH)</option>
+                  <option value="PB">Punjab (PB)</option>
+                  <option value="UP">Uttar Pradesh (UP)</option>
+                </select>
               </div>
             </div>
-          ))}
-        </div>
+
+            {/* Mandi Rates Table */}
+            <div className="mandi-table-container">
+              <table className="mandi-table">
+                <thead>
+                  <tr>
+                    <th>{lang === 'en' ? 'Crop' : 'फसल'}</th>
+                    <th>{lang === 'en' ? 'State' : 'राज्य'}</th>
+                    <th>{lang === 'en' ? 'Market / Mandi' : 'मंडी / बाज़ार'}</th>
+                    <th>{lang === 'en' ? 'Min Price' : 'न्यूनतम भाव'}</th>
+                    <th>{lang === 'en' ? 'Max Price' : 'अधिकतम भाव'}</th>
+                    <th>{lang === 'en' ? 'Average Price' : 'औसत भाव'}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {mandiRatesList.length === 0 ? (
+                    <tr>
+                      <td colSpan="6" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>
+                        {lang === 'en' ? 'No mandi records found.' : 'कोई मंडी रिकॉर्ड नहीं मिला।'}
+                      </td>
+                    </tr>
+                  ) : (
+                    mandiRatesList.map((rate) => (
+                      <tr key={rate.id}>
+                        <td style={{ fontWeight: '600' }}>{rate.crop}</td>
+                        <td><span className="badge-role" style={{ background: '#7F8C8D' }}>{rate.state}</span></td>
+                        <td>📍 {rate.mandi}</td>
+                        <td style={{ color: '#C0392B', fontWeight: '600' }}>₹{rate.minPrice} / qtl</td>
+                        <td style={{ color: '#27AE60', fontWeight: '600' }}>₹{rate.maxPrice} / qtl</td>
+                        <td style={{ color: 'var(--primary-dark)', fontWeight: '700', fontSize: '0.95rem' }}>₹{rate.avgPrice} / qtl</td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
       </section>
 
       {/* Weather Advisor Section */}
@@ -1496,6 +1642,49 @@ function App() {
           <p>{t.copyright}</p>
         </div>
       </footer>
+
+      {/* Floating Chatbot */}
+      <div className="chatbot-container">
+        {showChatbot ? (
+          <div className="chatbot-window">
+            <div className="chatbot-header">
+              <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                🌾 {lang === 'en' ? 'Krishi Assistant' : 'कृषि सहायक'}
+              </span>
+              <button className="chatbot-close" onClick={() => setShowChatbot(false)}>×</button>
+            </div>
+            
+            <div className="chatbot-messages">
+              {chatHistory.map((chat, idx) => (
+                <div key={idx} className={`chat-bubble ${chat.sender}`}>
+                  {chat.text}
+                </div>
+              ))}
+            </div>
+
+            <form onSubmit={handleChatbotSubmit} className="chatbot-input-area">
+              <input 
+                type="text" 
+                value={chatInput} 
+                onChange={(e) => setChatInput(e.target.value)} 
+                placeholder={lang === 'en' ? "Ask about crops, disease, KCC..." : "फसलों, बीमारी, KCC के बारे में पूछें..."}
+                className="chatbot-input"
+              />
+              <button type="submit" className="chatbot-send-btn">
+                {lang === 'en' ? 'Send' : 'भेजें'}
+              </button>
+            </form>
+          </div>
+        ) : (
+          <button 
+            className="chatbot-toggle" 
+            onClick={() => setShowChatbot(true)}
+            title={lang === 'en' ? 'Chat with Krishi Assistant' : 'कृषि सहायक से-चैट करें'}
+          >
+            💬
+          </button>
+        )}
+      </div>
     </>
   );
 }

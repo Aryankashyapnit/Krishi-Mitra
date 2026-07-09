@@ -466,6 +466,83 @@ app.post('/api/upload-image', upload.single('image'), async (req, res) => {
   }
 });
 
+// --- DYNAMIC CHATBOT & MANDI BOARD RATES ---
+
+app.get('/api/mandi-board', (req, res) => {
+  const { state, crop } = req.query;
+  
+  const mandiRates = [
+    { id: 1, crop: "Wheat (गेंहू)", state: "MP", mandi: "Indore Mandi", minPrice: 2100, maxPrice: 2350, avgPrice: 2225 },
+    { id: 2, crop: "Wheat (गेंहू)", state: "UP", mandi: "Hapur Mandi", minPrice: 2150, maxPrice: 2400, avgPrice: 2275 },
+    { id: 3, crop: "Wheat (गेंहू)", state: "PB", mandi: "Khanna Mandi", minPrice: 2200, maxPrice: 2450, avgPrice: 2325 },
+    { id: 4, crop: "Paddy (Rice/धान)", state: "PB", mandi: "Amritsar Mandi", minPrice: 1950, maxPrice: 2200, avgPrice: 2075 },
+    { id: 5, crop: "Paddy (Rice/धान)", state: "MP", mandi: "Jabalpur Mandi", minPrice: 1850, maxPrice: 2100, avgPrice: 1975 },
+    { id: 6, crop: "Onion (प्याज़)", state: "MH", mandi: "Lasalgaon Mandi", minPrice: 1500, maxPrice: 2200, avgPrice: 1850 },
+    { id: 7, crop: "Onion (प्याज़)", state: "MP", mandi: "Neemuch Mandi", minPrice: 1300, maxPrice: 1900, avgPrice: 1600 },
+    { id: 8, crop: "Potato (आलू)", state: "UP", mandi: "Agra Mandi", minPrice: 950, maxPrice: 1350, avgPrice: 1150 },
+    { id: 9, crop: "Potato (आलू)", state: "MH", mandi: "Pune Mandi", minPrice: 1100, maxPrice: 1500, avgPrice: 1300 },
+    { id: 10, crop: "Mustard (सरसों)", state: "PB", mandi: "Bhatinda Mandi", minPrice: 5200, maxPrice: 5800, avgPrice: 5500 },
+    { id: 11, crop: "Mustard (सरसों)", state: "MP", mandi: "Morena Mandi", minPrice: 5000, maxPrice: 5600, avgPrice: 5300 },
+    { id: 12, crop: "Tomato (टमाटर)", state: "MH", mandi: "Nashik Mandi", minPrice: 1200, maxPrice: 1800, avgPrice: 1500 }
+  ];
+
+  let filtered = mandiRates;
+  if (state && state !== 'All') {
+    filtered = filtered.filter(item => item.state.toLowerCase() === state.toLowerCase());
+  }
+  if (crop) {
+    filtered = filtered.filter(item => item.crop.toLowerCase().includes(crop.toLowerCase()));
+  }
+
+  res.json(filtered);
+});
+
+app.post('/api/chatbot', (req, res) => {
+  const { message } = req.body;
+  if (!message) {
+    return res.status(400).json({ error: 'Message is required' });
+  }
+
+  const queryMsg = message.toLowerCase();
+  let reply = "";
+
+  if (queryMsg.includes('hello') || queryMsg.includes('hi ') || queryMsg.includes('hey')) {
+    reply = "Hello! I am your Krishi Assistant. How can I help you today with crops, weather, mandi prices, or loans?";
+  } else if (queryMsg.includes('wheat') || queryMsg.includes('rust')) {
+    reply = "Wheat crops are prone to Leaf Rust disease (brown spots on leaves). Remedy: Spray neem oil formulation (10ml/L of water) or copper fungicide. Avoid over-irrigation during tillering.";
+  } else if (queryMsg.includes('tomato') || queryMsg.includes('blight')) {
+    reply = "Tomato Early Blight causes concentric dark spots on lower leaves. Remedy: Prune infected lower leaves, avoid overhead irrigation, and spray Trichoderma bio-fungicide.";
+  } else if (queryMsg.includes('rice') || queryMsg.includes('blight') || queryMsg.includes('paddy')) {
+    reply = "Rice Bacterial Leaf Blight causes yellowing and drying of leaves. Remedy: Drain excess water, apply potash fertilizer in split doses, and avoid excess nitrogen.";
+  } else if (queryMsg.includes('loan') || queryMsg.includes('kcc') || queryMsg.includes('subsidy')) {
+    reply = "You can access subsidized credits via the Kisan Credit Card (KCC) scheme starting at 4% interest, or PM Kisan subsidy (Rs 6,000/year). Check our 'Subsidies' tab for direct links.";
+  } else if (queryMsg.includes('weather') || queryMsg.includes('rain')) {
+    reply = "You can check dynamic weather advisories in the 'Weather Advisor' tab. Sowing is recommended when soil moisture is balanced.";
+  } else if (queryMsg.includes('mandi') || queryMsg.includes('price') || queryMsg.includes('rate')) {
+    reply = "Use our Marketplace 'Mandi Rates' panel to check the latest prices for crops across major Indian states.";
+  }
+  // Hindi
+  else if (queryMsg.includes('नमस्ते') || queryMsg.includes('प्रणाम') || queryMsg.includes('राम राम')) {
+    reply = "नमस्ते! मैं आपका कृषि सहायक हूँ। आज मैं फसलों, मौसम, मंडी भाव या कृषि ऋण योजनाओं में आपकी क्या सहायता कर सकता हूँ?";
+  } else if (queryMsg.includes('गेंहू') || queryMsg.includes('गेरूआ')) {
+    reply = "गेंहू में पत्ती गेरूआ (Rust) रोग की संभावना होती है। समाधान: नीम के तेल के घोल (10 मिली प्रति लीटर) का छिड़काव करें। खेतों में जल निकासी अच्छी रखें और बुवाई समय पर करें।";
+  } else if (queryMsg.includes('टमाटर') || queryMsg.includes('झुलसा')) {
+    reply = "टमाटर में अगेती झुलसा (Early Blight) रोग पत्तियों को सुखा देता है। समाधान: संक्रमित पत्तियों को हटाएं, तने के पास पानी दें, और ट्राइकोडर्मा जैविक कवकनाशी का प्रयोग करें।";
+  } else if (queryMsg.includes('धान') || queryMsg.includes('चावल')) {
+    reply = "धान में जीवाणु झुलसा (Bacterial Blight) रोग होने पर खेतों से अतिरिक्त पानी निकाल दें, यूरिया का अधिक उपयोग न करें और पोटाश की संतुलित मात्रा डालें।";
+  } else if (queryMsg.includes('लोन') || queryMsg.includes('कर्ज') || queryMsg.includes('योजना')) {
+    reply = "किसान क्रेडिट कार्ड (KCC) के तहत 4% ब्याज पर ऋण मिल सकता है। इसके अलावा पीएम किसान सम्मान निधि से प्रतिवर्ष ₹6,000 की वित्तीय मदद मिलती है। 'योजनाएं' टैब देखें।";
+  } else if (queryMsg.includes('मौसम') || queryMsg.includes('बारिश')) {
+    reply = "आप हमारे 'मौसम सलाहकार' टैब में जाकर अपने शहर का मौसम चेक कर सकते हैं और उसके अनुसार बुवाई की तैयारी कर सकते हैं।";
+  } else if (queryMsg.includes('भाव') || queryMsg.includes('रेट') || queryMsg.includes('मंडी')) {
+    reply = "मंडी बाजार में 'सरकारी मंडी भाव' पैनल का उपयोग करके आप मध्यप्रदेश, महाराष्ट्र, पंजाब और उत्तर प्रदेश की मंडियों के ताजा भाव देख सकते हैं।";
+  } else {
+    reply = "I'm sorry, I didn't fully catch that. Could you please specify if you're asking about Wheat, Rice, Tomato, Mandi Prices, Weather, or Government Schemes? / क्षमा करें, मैं समझ नहीं पाया। क्या आप गेंहू, टमाटर, धान, मंडी भाव, मौसम या लोन योजनाओं के बारे में पूछ रहे हैं?";
+  }
+
+  res.json({ reply });
+});
+
 // Run server
 app.listen(port, () => {
   console.log(`[Krishi Mitra] Express Server running on port ${port}`);

@@ -169,6 +169,17 @@ async function loadMarketplace() {
       }
     });
   }
+
+  // Load official mandi rates
+  loadMandiRates();
+  
+  // Attach filters for Mandi Board
+  const searchInput = document.getElementById('mandi-crop-search');
+  const stateFilter = document.getElementById('mandi-state-filter');
+  if (searchInput && stateFilter) {
+    searchInput.addEventListener('input', () => loadMandiRates());
+    stateFilter.addEventListener('change', () => loadMandiRates());
+  }
 }
 
 // 3. Weather forecast advisor
@@ -332,3 +343,128 @@ function setupLogin() {
     }
   });
 }
+
+// 7. Load Mandi Board rates dynamically
+async function loadMandiRates() {
+  const tbody = document.getElementById('mandi-rates-tbody');
+  if (!tbody) return;
+
+  const searchVal = document.getElementById('mandi-crop-search')?.value || '';
+  const stateVal = document.getElementById('mandi-state-filter')?.value || 'All';
+
+  try {
+    const stateQuery = stateVal !== 'All' ? `&state=${stateVal}` : '';
+    const cropQuery = searchVal ? `&crop=${searchVal}` : '';
+    const res = await fetch(`${API_BASE}/mandi-board?q=1${stateQuery}${cropQuery}`);
+    const data = await res.json();
+
+    if (data.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="6" style="padding: 1.5rem; text-align: center; color: #666;">No mandi records found.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = data.map(rate => `
+      <tr style="border-bottom: 1px solid #e2e8f0;">
+        <td style="padding: 0.85rem 1.25rem; font-weight: 600; color: #333;">${rate.crop}</td>
+        <td style="padding: 0.85rem 1.25rem;"><span style="background: #7F8C8D; color: white; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.8rem; font-weight: 700;">${rate.state}</span></td>
+        <td style="padding: 0.85rem 1.25rem; color: #555;">📍 ${rate.mandi}</td>
+        <td style="padding: 0.85rem 1.25rem; color: #C0392B; font-weight: 600;">₹${rate.minPrice} / qtl</td>
+        <td style="padding: 0.85rem 1.25rem; color: #27AE60; font-weight: 600;">₹${rate.maxPrice} / qtl</td>
+        <td style="padding: 0.85rem 1.25rem; color: #1B5E20; font-weight: 700;">₹${rate.avgPrice} / qtl</td>
+      </tr>
+    `).join('');
+  } catch (err) {
+    console.error('Error fetching mandi board rates:', err);
+    tbody.innerHTML = `<tr><td colspan="6" style="padding: 1.5rem; text-align: center; color: red;">Failed to load mandi rates.</td></tr>`;
+  }
+}
+
+// 8. Dynamic Kisan Chatbot Injection
+function setupChatbot() {
+  // Inject Chatbot HTML structure
+  const chatbotDiv = document.createElement('div');
+  chatbotDiv.className = 'chatbot-container';
+  chatbotDiv.innerHTML = `
+    <button class="chatbot-toggle" id="chat-toggle" title="Chat with Assistant">💬</button>
+    <div class="chatbot-window" id="chat-window">
+      <div class="chatbot-header">
+        <span style="display:flex; align-items:center; gap:6px;">🌾 Krishi Assistant / कृषि सहायक</span>
+        <button class="chatbot-close" id="chat-close">×</button>
+      </div>
+      <div class="chatbot-messages" id="chat-messages">
+        <div class="chat-bubble assistant">
+          Hello! I am your Krishi Assistant. Ask me anything about crop diseases, Mandi prices, KCC loans or weather! / नमस्ते! मैं आपका कृषि सहायक हूँ। फसलों की बीमारी, मंडी भाव, KCC लोन या मौसम के बारे में कुछ भी पूछें!
+        </div>
+      </div>
+      <form class="chatbot-input-area" id="chat-form">
+        <input type="text" class="chatbot-input" id="chat-input" placeholder="Ask a question..." required autocomplete="off">
+        <button type="submit" class="chatbot-send-btn">Send</button>
+      </form>
+    </div>
+  `;
+  document.body.appendChild(chatbotDiv);
+
+  // Register Event Listeners
+  const chatToggle = document.getElementById('chat-toggle');
+  const chatClose = document.getElementById('chat-close');
+  const chatWindow = document.getElementById('chat-window');
+  const chatForm = document.getElementById('chat-form');
+  const chatInput = document.getElementById('chat-input');
+  const chatMessages = document.getElementById('chat-messages');
+
+  chatToggle.addEventListener('click', () => {
+    chatWindow.style.display = 'flex';
+    chatToggle.style.display = 'none';
+  });
+
+  chatClose.addEventListener('click', () => {
+    chatWindow.style.display = 'none';
+    chatToggle.style.display = 'flex';
+  });
+
+  chatForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const query = chatInput.value.trim();
+    if (!query) return;
+
+    chatInput.value = '';
+
+    // Append User Bubble
+    const userBubble = document.createElement('div');
+    userBubble.className = 'chat-bubble user';
+    userBubble.textContent = query;
+    chatMessages.appendChild(userBubble);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+
+    // Append Loading Assistant bubble
+    const loadingBubble = document.createElement('div');
+    loadingBubble.className = 'chat-bubble assistant';
+    loadingBubble.textContent = 'Typing...';
+    chatMessages.appendChild(loadingBubble);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+
+    try {
+      const res = await fetch('http://localhost:3000/api/chatbot', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: query })
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        loadingBubble.textContent = data.reply;
+      } else {
+        throw new Error('Server error');
+      }
+    } catch (err) {
+      loadingBubble.textContent = 'Sorry, server error. Please try again later! / क्षमा करें, तकनीकी समस्या हो रही है।';
+    }
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  });
+}
+
+// Automatically execute setupChatbot on DOM ready
+document.addEventListener('DOMContentLoaded', () => {
+  setupChatbot();
+});
+

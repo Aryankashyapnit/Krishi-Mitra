@@ -98,6 +98,51 @@
     <div id="listings-container" class="item-grid">
       <p style="grid-column: 1/-1; text-align:center">Loading crop listings...</p>
     </div>
+
+    <!-- Official Mandi Board Rates Section -->
+    <div class="section-header" style="margin-top: 5rem;">
+      <h2>Official Mandi Rates (सरकारी मंडी भाव)</h2>
+      <p>Real-time official state mandi board rates.</p>
+    </div>
+
+    <div class="form-card" style="max-width: 900px; margin-bottom: 4rem; margin-left: auto; margin-right: auto;">
+      <div style="display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+        <div class="form-group" style="margin-bottom: 0; text-align: left;">
+          <label for="mandi-crop-search">Search Crop</label>
+          <input type="text" id="mandi-crop-search" placeholder="Search e.g. Wheat..." style="width: 100%; box-sizing: border-box; padding: 0.75rem; border: 1px solid #ccc; border-radius: 6px;">
+        </div>
+        <div class="form-group" style="margin-bottom: 0; text-align: left;">
+          <label for="mandi-state-filter">Filter by State</label>
+          <select id="mandi-state-filter" style="width: 100%; box-sizing: border-box; padding: 0.75rem; border: 1px solid #ccc; border-radius: 6px;">
+            <option value="All">All States (सभी राज्य)</option>
+            <option value="MP">Madhya Pradesh (MP)</option>
+            <option value="MH">Maharashtra (MH)</option>
+            <option value="PB">Punjab (PB)</option>
+            <option value="UP">Uttar Pradesh (UP)</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="width: 100%; overflow-x: auto; background: white; border-radius: 6px; border: 1px solid #e2e8f0; margin-top: 1.5rem;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
+          <thead>
+            <tr style="background: #f8fafc; border-bottom: 1.5px solid #e2e8f0;">
+              <th style="padding: 0.85rem 1.25rem; font-weight: 700; color: #1B5E20">Crop</th>
+              <th style="padding: 0.85rem 1.25rem; font-weight: 700; color: #1B5E20">State</th>
+              <th style="padding: 0.85rem 1.25rem; font-weight: 700; color: #1B5E20">Market / Mandi</th>
+              <th style="padding: 0.85rem 1.25rem; font-weight: 700; color: #1B5E20">Min Price</th>
+              <th style="padding: 0.85rem 1.25rem; font-weight: 700; color: #1B5E20">Max Price</th>
+              <th style="padding: 0.85rem 1.25rem; font-weight: 700; color: #1B5E20">Average Price</th>
+            </tr>
+          </thead>
+          <tbody id="mandi-rates-tbody">
+            <tr>
+              <td colspan="6" style="padding: 1.5rem; text-align: center; color: #666;">Loading mandi board rates...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
   </main>
 
   <footer>
