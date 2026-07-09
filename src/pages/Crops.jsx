@@ -1,25 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { cropsData } from '../data/mockData';
 import '../App.css';
 
 const Crops = () => {
-  const [crops, setCrops] = useState([]);
+  const [crops] = useState(cropsData);
+  const [searchQuery, setSearchQuery] = useState('');
   const [selectedCropDetails, setSelectedCropDetails] = useState(null);
-  const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:3000/api' : '/api';
 
-  useEffect(() => {
-    const fetchCrops = async () => {
-      try {
-        const res = await fetch(`${API_BASE}/crops`);
-        if (res.ok) {
-          const data = await res.json();
-          setCrops(data);
-        }
-      } catch (err) {
-        console.error("Failed to fetch crops database in page Crops.jsx:", err);
-      }
-    };
-    fetchCrops();
-  }, []);
+  const filteredCrops = crops.filter(crop => 
+    crop.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    crop.season.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <div className="page-wrapper" style={{ display: 'flex', flexDirection: 'column', position: 'relative', width: '100%' }}>
@@ -33,16 +24,37 @@ const Crops = () => {
             🌾 CROP HANDBOOK
           </span>
           <h2 className="section-title" style={{ fontSize: '2.5rem', marginTop: '1rem' }}>Scientific Cultivation Protocols</h2>
-          <p className="section-subtitle">Click on any crop card below to view detailed soil prep, water regimes, and organic fertilizer schedules.</p>
+          <p className="section-subtitle" style={{ marginBottom: '2rem' }}>Click on any crop card below to view detailed soil prep, water regimes, and organic fertilizer schedules.</p>
+          
+          {/* Search bar */}
+          <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <input 
+              type="text" 
+              placeholder="Search crops by name or season..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              style={{
+                padding: '0.8rem 1.25rem',
+                borderRadius: '12px',
+                border: '1px solid var(--border-color)',
+                outline: 'none',
+                width: '320px',
+                maxWidth: '100%',
+                fontFamily: 'var(--sans)',
+                fontSize: '0.92rem',
+                boxShadow: 'var(--shadow-sm)'
+              }}
+            />
+          </div>
         </div>
 
         <div className="features-grid">
-          {crops.length === 0 ? (
+          {filteredCrops.length === 0 ? (
             <p style={{ gridColumn: '1/-1', textAlign: 'center', color: 'var(--text-muted)' }}>
-              Loading crop databases from backend API...
+              No crops found matching your search.
             </p>
           ) : (
-            crops.map((crop) => (
+            filteredCrops.map((crop) => (
               <div 
                 key={crop.id} 
                 className="feature-card" 
@@ -69,8 +81,8 @@ const Crops = () => {
                 <div style={{ padding: '1.75rem', display: 'flex', flexDirection: 'column', flexGrow: '1', textAlign: 'left' }}>
                   <h3 className="feature-title" style={{ fontSize: '1.35rem', color: 'var(--primary-dark)', margin: '0 0 1.25rem', fontWeight: '800' }}>{crop.name}</h3>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', fontSize: '0.9rem', marginBottom: '1rem', flexGrow: '1', color: 'var(--text-dark)' }}>
-                    <div><strong>🌱 Soil:</strong> {crop.soil_type}</div>
-                    <div><strong>💧 Water:</strong> {crop.water_needs.substring(0, 45)}...</div>
+                    <div><strong>🌱 Soil:</strong> {crop.soilType}</div>
+                    <div><strong>📝 Info:</strong> {crop.description.substring(0, 45)}...</div>
                   </div>
                   <span style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--primary-light)', display: 'flex', alignItems: 'center', gap: '4px', marginTop: 'auto' }}>
                     View Protocols →
@@ -140,15 +152,15 @@ const Crops = () => {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', borderTop: '1px solid rgba(0,0,0,0.08)', paddingTop: '1.25rem' }}>
                 <div>
                   <strong style={{ color: 'var(--primary-dark)', display: 'block', marginBottom: '0.25rem', fontSize: '0.95rem' }}>🌱 Soil Type / मिट्टी</strong>
-                  <span style={{ fontSize: '0.92rem', color: 'var(--text-dark)' }}>{selectedCropDetails.soil_type}</span>
+                  <span style={{ fontSize: '0.92rem', color: 'var(--text-dark)' }}>{selectedCropDetails.soilType}</span>
                 </div>
                 <div>
-                  <strong style={{ color: 'var(--primary-dark)', display: 'block', marginBottom: '0.25rem', fontSize: '0.95rem' }}>💧 Water Demand / सिंचाई</strong>
-                  <span style={{ fontSize: '0.92rem', color: 'var(--text-dark)' }}>{selectedCropDetails.water_needs}</span>
+                  <strong style={{ color: 'var(--primary-dark)', display: 'block', marginBottom: '0.25rem', fontSize: '0.95rem' }}>📅 Sowing season / मौसम</strong>
+                  <span style={{ fontSize: '0.92rem', color: 'var(--text-dark)' }}>{selectedCropDetails.season}</span>
                 </div>
                 <div style={{ gridColumn: '1/-1' }}>
-                  <strong style={{ color: 'var(--primary-dark)', display: 'block', marginBottom: '0.25rem', fontSize: '0.95rem' }}>🧪 Scientific Fertilizers & Organic tips / वैज्ञानिक खाद</strong>
-                  <p style={{ fontSize: '0.92rem', color: 'var(--text-dark)', margin: 0, lineHeight: '1.55' }}>{selectedCropDetails.fertilizer_tips}</p>
+                  <strong style={{ color: 'var(--primary-dark)', display: 'block', marginBottom: '0.25rem', fontSize: '0.95rem' }}>🧪 Crop Details & Guidelines / कृषि विवरण</strong>
+                  <p style={{ fontSize: '0.92rem', color: 'var(--text-dark)', margin: 0, lineHeight: '1.55' }}>{selectedCropDetails.description}</p>
                 </div>
               </div>
             </div>

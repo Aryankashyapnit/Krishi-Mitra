@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { marketplaceData } from '../data/mockData';
 
 const Marketplace = ({ lang, token, user, t }) => {
   const [marketTab, setMarketTab] = useState('listings');
-  const [listings, setListings] = useState([]);
+  const [listings, setListings] = useState(marketplaceData);
+  const [searchQuery, setSearchQuery] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
   
   // Listing form states
@@ -17,22 +19,6 @@ const Marketplace = ({ lang, token, user, t }) => {
   const [mandiCropSearch, setMandiCropSearch] = useState('');
 
   const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:3000/api' : '/api';
-
-  const fetchListings = async () => {
-    try {
-      const res = await fetch(`${API_BASE}/listings`);
-      if (res.ok) {
-        const data = await res.json();
-        setListings(data);
-      }
-    } catch (err) {
-      // Local fallback
-      setListings([
-        { id: 1, crop_name: "Premium Wheat (गेंहू)", quantity: "500 kg", price: 24, location: "Indore Mandi", seller_phone: "9876543210", seller_name: "Ramesh Kumar" },
-        { id: 2, crop_name: "Basmati Rice (धान)", quantity: "1200 kg", price: 65, location: "Karnal Hub", seller_phone: "9988776655", seller_name: "Sukhbir Singh" }
-      ]);
-    }
-  };
 
   const fetchMandiBoard = async (state, crop) => {
     try {
@@ -53,49 +39,33 @@ const Marketplace = ({ lang, token, user, t }) => {
   };
 
   useEffect(() => {
-    fetchListings();
-  }, []);
-
-  useEffect(() => {
     fetchMandiBoard(mandiStateFilter, mandiCropSearch);
   }, [mandiStateFilter, mandiCropSearch]);
 
-  const handleAddListing = async (e) => {
+  const handleAddListing = (e) => {
     e.preventDefault();
-    if (!token) {
-      alert('Please login to post a listing.');
-      return;
-    }
-    try {
-      const res = await fetch(`${API_BASE}/listings`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          cropName: newCrop,
-          quantity: newQty,
-          price: newPrice,
-          location: newLoc
-        })
-      });
-
-      if (res.ok) {
-        fetchListings();
-        setNewCrop('');
-        setNewQty('');
-        setNewPrice('');
-        setNewLoc('');
-        setShowAddForm(false);
-        alert('Listing posted successfully!');
-      } else {
-        alert('Failed to post listing.');
-      }
-    } catch (err) {
-      alert('Failed to post listing.');
-    }
+    const newOffer = {
+      id: listings.length + 1,
+      cropName: newCrop,
+      price: parseFloat(newPrice),
+      quantity: newQty || '100 kg',
+      sellerName: user?.name || 'Farmer Ramesh',
+      location: newLoc || 'Local Mandi',
+      date: new Date().toISOString().split('T')[0]
+    };
+    setListings([newOffer, ...listings]);
+    setNewCrop('');
+    setNewQty('');
+    setNewPrice('');
+    setNewLoc('');
+    setShowAddForm(false);
+    alert(lang === 'en' ? 'Listing posted successfully!' : 'फसल की सूची सफलतापूर्वक जोड़ दी गई है!');
   };
+
+  const filteredListings = listings.filter(list => 
+    list.cropName.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    list.location.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <div style={{ position: 'relative', width: '100%' }}>
@@ -132,8 +102,25 @@ const Marketplace = ({ lang, token, user, t }) => {
 
         {marketTab === 'listings' ? (
           <>
-            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '2.5rem' }}>
-              <button onClick={() => setShowAddForm(!showAddForm)} className="btn-primary" style={{ padding: '0.85rem 2rem', borderRadius: '12px', fontSize: '0.95rem' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', background: 'rgba(255,255,255,0.7)', padding: '1rem 1.5rem', borderRadius: '16px', border: '1px solid var(--border-color)', backdropFilter: 'blur(12px)' }}>
+              <input 
+                type="text" 
+                placeholder={lang === 'en' ? "Search crop or location..." : "फसल या स्थान खोजें..."}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                style={{ 
+                  padding: '0.75rem 1.25rem', 
+                  borderRadius: '10px', 
+                  border: '1px solid var(--border-color)', 
+                  outline: 'none', 
+                  width: '300px', 
+                  maxWidth: '100%', 
+                  fontFamily: 'var(--sans)', 
+                  fontSize: '0.92rem'
+                }}
+              />
+              
+              <button onClick={() => setShowAddForm(!showAddForm)} className="btn-primary" style={{ padding: '0.75rem 1.75rem', borderRadius: '10px', fontSize: '0.92rem' }}>
                 🌾 {t.addListing}
               </button>
             </div>
@@ -194,33 +181,37 @@ const Marketplace = ({ lang, token, user, t }) => {
             )}
 
             <div className="features-grid">
-              {listings.map((list) => (
-                <div key={list.id} className="feature-card" style={{ borderLeft: '5px solid var(--primary-light)', padding: '1.75rem', textAlign: 'left', display: 'flex', flexDirection: 'column', minHeight: '260px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: '1.3rem', fontWeight: '800', color: 'var(--primary-dark)' }}>{list.crop_name}</span>
-                    <span style={{ background: '#E8F5E9', color: 'var(--primary-dark)', padding: '0.25rem 0.75rem', borderRadius: '50px', fontSize: '0.78rem', fontWeight: '800' }}>
-                      {list.quantity}
-                    </span>
-                  </div>
-                  <div style={{ margin: '1rem 0', fontSize: '1.5rem', fontWeight: '800', color: 'var(--primary-dark)', flexGrow: 1 }}>
-                    ₹{list.price} <span style={{ fontSize: '0.85rem', fontWeight: '400', color: 'var(--text-muted)' }}>/ kg</span>
-                  </div>
-                  <div style={{ fontSize: '0.88rem', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', gap: '0.4rem', borderTop: '1px solid rgba(0,0,0,0.05)', paddingTop: '1rem' }}>
-                    <div>📍 {list.location}</div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.4rem' }}>
-                      <span style={{ fontWeight: '700', color: 'var(--text-dark)' }}>👤 {list.seller_name || 'Farmer'}</span>
-                      <a href={`tel:${list.seller_phone}`} style={{ textDecoration: 'none', background: 'var(--primary-dark)', color: 'white', padding: '0.35rem 0.85rem', borderRadius: '6px', fontSize: '0.8rem', fontWeight: '700' }}>
-                        📞 Call
-                      </a>
+              {filteredListings.length === 0 ? (
+                <p style={{ gridColumn: '1/-1', textAlign: 'center', color: 'var(--text-muted)' }}>
+                  {lang === 'en' ? 'No crop listings found matching your search.' : 'आपकी खोज से मेल खाती कोई फसल सूची नहीं मिली।'}
+                </p>
+              ) : (
+                filteredListings.map((list) => (
+                  <div key={list.id} className="feature-card" style={{ borderLeft: '5px solid var(--primary-light)', padding: '1.75rem', textAlign: 'left', display: 'flex', flexDirection: 'column', minHeight: '260px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: '1.3rem', fontWeight: '800', color: 'var(--primary-dark)' }}>{list.cropName}</span>
+                      <span style={{ background: '#E8F5E9', color: 'var(--primary-dark)', padding: '0.25rem 0.75rem', borderRadius: '50px', fontSize: '0.78rem', fontWeight: '800' }}>
+                        {list.quantity || '100 kg'}
+                      </span>
+                    </div>
+                    <div style={{ margin: '1rem 0', fontSize: '1.5rem', fontWeight: '800', color: 'var(--primary-dark)', flexGrow: 1 }}>
+                      ₹{list.price} <span style={{ fontSize: '0.85rem', fontWeight: '400', color: 'var(--text-muted)' }}>/ kg</span>
+                    </div>
+                    <div style={{ fontSize: '0.88rem', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', gap: '0.4rem', borderTop: '1px solid rgba(0,0,0,0.05)', paddingTop: '1rem' }}>
+                      <div>📍 {list.location}</div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.4rem' }}>
+                        <span style={{ fontWeight: '700', color: 'var(--text-dark)' }}>👤 {list.sellerName}</span>
+                        <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>📅 {list.date}</span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-            {/* Search Filters */}
+            {/* Mandi Rates filters */}
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.7)', padding: '1.25rem', borderRadius: '16px', border: '1px solid var(--border-color)', backdropFilter: 'blur(12px)', textAlign: 'left' }}>
               <input 
                 type="text" 
