@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Logo from './components/Logo';
 import './App.css';
 
-const API_BASE = 'http://localhost:3000/api';
+const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:3000/api' : '/api';
 
 const defaultCrops = [
   { id: 1, name: "Wheat (गेंहू)", season: "Rabi", soil_type: "Clayey / Loamy", water_needs: "Moderate watering (4-6 times)", fertilizer_tips: "Apply NPK (4:2:1). Top-dress with urea.", image_url: "https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=400" },
