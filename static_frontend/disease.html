@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Leaf Scan – Krishi Mitra</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <div class="nav-container">
+      
+      <a href="index.html" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none; color: inherit">
+        <!-- Vector Logo representing Plant + Sun -->
+        <svg width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="static-green" x1="15" y1="85" x2="40" y2="15" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#0B4B28" />
+              <stop offset="50%" stop-color="#1B5E20" />
+              <stop offset="100%" stop-color="#4CAF50" />
+            </linearGradient>
+            <linearGradient id="static-gold" x1="45" y1="85" x2="85" y2="45" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#A87F18" />
+              <stop offset="60%" stop-color="#D4AF37" />
+              <stop offset="100%" stop-color="#F3E5AB" />
+            </linearGradient>
+            <linearGradient id="static-sun" x1="55" y1="15" x2="55" y2="55" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#E5A93B" />
+              <stop offset="100%" stop-color="#F7D373" />
+            </linearGradient>
+          </defs>
+          <circle cx="56" cy="36" r="18" fill="url(#static-sun)" />
+          <path d="M50 82 C40 82 23 70 16 50 C10 35 12 21 16 14 C27 19 37 32 39 46 C41 60 48 76 50 82 Z" fill="url(#static-green)" />
+          <path d="M18 16 C23 32 31 49 47 67" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" opacity="0.5" />
+          <path d="M50 82 C53 71 63 56 78 52 C88 48 90 60 84 68 C76 76 63 81 50 82 Z" fill="url(#static-gold)" />
+          <path d="M51 82 C61 74 72 70 81 68" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" opacity="0.4" />
+          <path d="M50 82 C44 82 40 76 42 70 C44 64 50 60 56 60" stroke="#0B4B28" stroke-width="3.5" stroke-linecap="round" fill="none" />
+        </svg>
+        <div style="display: flex; flex-direction: column; text-align: left; line-height: 1">
+          <h1 style="display: flex; gap: 4px; font-size: 1.4rem; margin: 0; line-height: 1">
+            <span style="color: #0B4B28">Krishi</span>
+            <span style="color: #4CAF50">Mitra</span>
+          </h1>
+          <span style="font-size: 0.5rem; font-weight: 700; letter-spacing: 0.5px; color: #666666; margin-top: 2px">
+            AGRICULTURE'S TRUE FRIEND
+          </span>
+        </div>
+      </a>
+
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="crops.html">Crops Guide</a>
+        <a href="marketplace.html">Marketplace</a>
+        <a href="weather.html">Weather Advisor</a>
+        <a href="loans.html">Subsidies</a>
+        <a href="disease.html" style="color: var(--primary-light)">Disease Scanner</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="section-header">
+      <h2>AI Crop Disease Scanner</h2>
+      <p>Instantly diagnose crop diseases and find organic cures. Upload a picture of the infected leaf.</p>
+    </div>
+
+    <div class="uploader-box">
+      <form id="scanner-form" enctype="multipart/form-data">
+        <div style="font-size: 4rem; margin-bottom: 1.5rem">🍃</div>
+        <div class="form-group" style="max-width: 320px; margin: 0 auto 1.5rem">
+          <input type="file" id="leaf-image" accept="image/*" required style="padding:0.5rem; border:none; background:#F8FAFC; border-radius:6px">
+        </div>
+        <button type="submit" class="submit-btn" style="max-width: 250px; margin:0 auto">Analyze Leaf Photo</button>
+      </form>
+    </div>
+
+    <div id="scan-result" style="margin-top: 3rem">
+      <!-- Diagnostic results will load here -->
+    </div>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 Krishi Mitra. Your Farming Partner.</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
